@@ -2,132 +2,135 @@
   <div class="col-md-12">
     <div class="card card-container">
       <img
-        id="profile-img"
-        src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-        class="profile-img-card"
+          id="profile-img"
+          src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
+          class="profile-img-card"
       />
-      <form name="form" @submit.prevent="handleRegister">
+      <Form @submit="handleRegister" :validation-schema="schema">
         <div v-if="!successful">
-        <div class="form-group">
-            <label for="username">Name</label>
-            <input
-              v-model="user.name"
-              v-validate="'required|min:3|max:20'"
-              type="text"
-              class="form-control"
-              name="name"
-            />
-            <div
-              v-if="submitted && errors.has('name')"
-              class="alert-danger"
-            >{{errors.first('name')}}</div>
+          <div class="form-group">
+            <label for="name">Name</label>
+            <Field name="name" type="text" class="form-control" />
+            <ErrorMessage name="name" class="error-feedback" />
           </div>
           <div class="form-group">
             <label for="username">Username</label>
-            <input
-              v-model="user.username"
-              v-validate="'required|min:3|max:20'"
-              type="text"
-              class="form-control"
-              name="username"
-            />
-            <div
-              v-if="submitted && errors.has('username')"
-              class="alert-danger"
-            >{{errors.first('username')}}</div>
+            <Field name="username" type="text" class="form-control" />
+            <ErrorMessage name="username" class="error-feedback" />
           </div>
           <div class="form-group">
             <label for="email">Email</label>
-            <input
-              v-model="user.email"
-              v-validate="'required|email|max:50'"
-              type="email"
-              class="form-control"
-              name="email"
-            />
-            <div
-              v-if="submitted && errors.has('email')"
-              class="alert-danger"
-            >{{errors.first('email')}}</div>
+            <Field name="email" type="email" class="form-control" />
+            <ErrorMessage name="email" class="error-feedback" />
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input
-              v-model="user.password"
-              v-validate="'required|min:6|max:40'"
-              type="password"
-              class="form-control"
-              name="password"
-            />
-            <div
-              v-if="submitted && errors.has('password')"
-              class="alert-danger"
-            >{{errors.first('password')}}</div>
+            <Field name="password" type="password" class="form-control" />
+            <ErrorMessage name="password" class="error-feedback" />
           </div>
+
           <div class="form-group">
-            <button class="btn btn-primary btn-block">Sign Up</button>
+            <button class="btn btn-primary btn-block" :disabled="loading">
+              <span
+                  v-show="loading"
+                  class="spinner-border spinner-border-sm"
+              ></span>
+              Sign Up
+            </button>
           </div>
         </div>
-      </form>
+      </Form>
 
       <div
-        v-if="message"
-        class="alert"
-        :class="successful ? 'alert-success' : 'alert-danger'"
-      >{{message}}</div>
+          v-if="message"
+          class="alert"
+          :class="successful ? 'alert-success' : 'alert-danger'"
+      >
+        {{ message }}
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import User from '../models/user';
+import { Form, Field, ErrorMessage } from "vee-validate";
+import * as yup from "yup";
 
 export default {
-  name: 'Register',
+  name: "Register",
+  components: {
+    Form,
+    Field,
+    ErrorMessage,
+  },
   data() {
+    const schema = yup.object().shape({
+      name: yup
+          .string()
+          .required("Username is required!")
+          .min(3, "Must be at least 3 characters!")
+          .max(20, "Must be maximum 20 characters!"),
+      username: yup
+          .string()
+          .required("Username is required!")
+          .min(3, "Must be at least 3 characters!")
+          .max(20, "Must be maximum 20 characters!"),
+      email: yup
+          .string()
+          .required("Email is required!")
+          .email("Email is invalid!")
+          .max(50, "Must be maximum 50 characters!"),
+      password: yup
+          .string()
+          .required("Password is required!")
+          .min(6, "Must be at least 6 characters!")
+          .max(40, "Must be maximum 40 characters!"),
+    });
+
     return {
-      user: new User('', '', '',''),
-      submitted: false,
       successful: false,
-      message: ''
+      loading: false,
+      message: "",
+      schema,
     };
   },
   computed: {
     loggedIn() {
       return this.$store.state.auth.status.loggedIn;
-    }
+    },
   },
   mounted() {
     if (this.loggedIn) {
-      this.$router.push('/profile');
+      this.$router.push("/profile");
     }
   },
   methods: {
-    handleRegister() {
-      this.message = '';
-      this.submitted = true;
-      this.$validator.validate().then(isValid => {
-        if (isValid) {
-          this.$store.dispatch('auth/register', this.user).then(
-            data => {
-              this.message = data.message;
-              this.successful = true;
-            },
-            error => {
-              this.message =
-                (error.response && error.response.data) ||
+    handleRegister(user) {
+      this.message = "";
+      this.successful = false;
+      this.loading = true;
+
+      this.$store.dispatch("auth/register", user).then(
+          (data) => {
+            this.message = data.message;
+            this.successful = true;
+            this.loading = false;
+          },
+          (error) => {
+            this.message =
+                (error.response &&
+                    error.response.data &&
+                    error.response.data.message) ||
                 error.message ||
                 error.toString();
-              this.successful = false;
-            }
-          );
-        }
-      });
-    }
-  }
+            this.successful = false;
+            this.loading = false;
+          }
+      );
+    },
+  },
 };
 </script>
-
 <style scoped>
 label {
   display: block;
