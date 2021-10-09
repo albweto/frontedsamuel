@@ -2,7 +2,8 @@ import { createWebHistory, createRouter } from "vue-router";
 import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
-import Prueba from "@/views/prueba.vue"
+import RegisterTarea from "@/views/RegisterTarea"
+import ListTarea from "@/views/ListTarea"
 // lazy-loaded
 const Profile = () => import("@/views/Profile.vue")
 const BoardAdmin = () => import("@/views/BoardAdmin.vue")
@@ -11,9 +12,13 @@ const BoardUser = () => import("@/views/BoardUser.vue")
 
 const routes = [
   {
-    path: "/prueba",
-    name: "Prueba",
-    component: Prueba,
+    path: "/tarea/nueva",
+    name: "RegisterTarea",
+    component: RegisterTarea,
+  },{
+    path: "/tarea/list",
+    name: "ListTarea",
+    component: ListTarea,
   },
   {
     path: "/",
