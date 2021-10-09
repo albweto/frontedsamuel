@@ -1,7 +1,6 @@
 <template>
-  <div class="container">
-    <h3 class="p-3 text-center">Vue.js - Display a list of items with v-for</h3>
-    <table class="table table-striped table-bordered">
+  <div class="container pt-5">
+    <table class="table table-striped table-bordered ">
       <thead>
       <tr>
         <th>Name</th>
@@ -16,6 +15,11 @@
         <td>{{tarea.fechaCreacion}}</td>
         <td>{{tarea.finalizado}}</td>
         <td>{{tarea.fechaVencimiento}}</td>
+        <td>
+          <button class="btn btn-danger" :disabled="loading" @click="deleteTarea(tarea.id)" >
+            eliminar
+          </button>
+        </td>
       </tr>
       </tbody>
     </table>
@@ -28,6 +32,7 @@ export default {
   name: "ListTarea",
   data() {
     return {
+      message: "",
       tareas: [],
       currentTutorial: null,
       currentIndex: -1,
@@ -46,10 +51,10 @@ export default {
     if (!this.loggedIn) {
       this.$router.push('/login');
     }
-    this.retrieveTutorials();
+    this.retrieveTareas();
   },
   methods: {
-    retrieveTutorials() {
+    retrieveTareas() {
       TareaService.getAllListByUser()
           .then(response => {
             this.tareas = response.data;
@@ -58,7 +63,18 @@ export default {
           .catch(e => {
             console.log(e);
           });
+    },
+    deleteTarea(id){
+      TareaService.deleteTarea(id).then(response =>{
+        this.message = response.data.mensaje;
+        this.$toast.info(this.message);
+        this.retrieveTareas()
+      })
+          .catch(e => {
+            this.$toast.error(e.messageerror)
+          });
     }
+
   }
 }
 </script>

@@ -12,13 +12,17 @@ class TareaService{
         return axios.get(API_URL + 'allAdmin',{headers: authHeader()});
     }
     getAllListByUser(){
-        return http.get(API_URL + 'all/'+user.nombreUsuario);
+        return http.get(API_URL + 'all/'+user.nombreUsuario,{headers: authHeader()});
     }
 
     registerTarea(data){
         console.log("header"+JSON.stringify(authHeader()));
         console.log("data"+JSON.stringify(data));
-        return http.post("create", data)
+        return http.post("create", data,{headers: authHeader()})
+    }
+
+    deleteTarea(id){
+        return http.delete('/delete/'+id,{headers: authHeader()})
     }
     
 }
